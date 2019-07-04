@@ -105,7 +105,7 @@ sub indicator_date_correct_format {
                      )?
                      \z/x) {
 
-            return [200, "OK", "Some dates are not in the correct format, e.g. '$rel->{_parsed_date}'"];
+            return [200, "OK", "Some dates are not in the correct format, e.g. in version $v"];
         }
     }
     [200, "OK", ''];
