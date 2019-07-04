@@ -180,6 +180,38 @@ sub indicator_release_dates_not_future {
     [200, "OK", ''];
 }
 
+$SPEC{indicator_entries_not_useless_text} = {
+    v => 1.1,
+    summary => 'No useless text in the change lines, e.g. "Release v1.23"',
+    args => {
+    },
+    'x.indicator.severity' => 2,
+};
+sub indicator_entries_not_useless_text {
+    my %args = @_;
+    my $r = $args{r};
+
+    my $p = $r->{parsed};
+    defined $p or return [412];
+
+    for my $ver (sort keys %{ $p->{releases} }) {
+        my $rel = $p->{releases}{$ver};
+        for my $chgroup (sort keys %{ $rel->{changes} }) {
+            my $gchanges = $rel->{changes}{$chgroup}{changes};
+            for my $change (@$gchanges) {
+                if ($change =~
+                        m!\A\s*(
+                              (version \s+|v)? \d\S* \s+ released |
+                              (release(d|s)? \s+)? (version \s+|v)? \d\S* |
+                          )\s*(\.)?\s*\z!ix) {
+                    return [200, "OK", "Useless change text: $change"];
+                }
+            }
+        }
+    }
+    [200, "OK", ''];
+}
+
 # currently commented-out, not good results
 #
 # $SPEC{indicator_preamble_english} = {
@@ -221,9 +253,9 @@ sub indicator_release_dates_not_future {
 # TODO: indicator_sufficient_entries_length
 # TODO: indicator_version_correct_format
 # TODO: indicator_entries_not_commit_logs
-# TODO: indicator_entries_not_useless (e.g. 'Update/prepare Changes for v0.01')
 # TODO: indicator_name_preferred (e.g. Changes and not ChangeLog.txt)
 # TODO: indicator_text_not_too_wide
+# TODO: indicator_no_duplicate_version
 
 1;
 # ABSTRACT: A collection of core indicators for CPAN Changes cwalitee
