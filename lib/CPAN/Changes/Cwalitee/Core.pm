@@ -256,6 +256,12 @@ sub indicator_entries_not_useless_text {
 # TODO: indicator_name_preferred (e.g. Changes and not ChangeLog.txt)
 # TODO: indicator_text_not_too_wide
 # TODO: indicator_no_duplicate_version
+# TODO: indicator_entries_not_all_caps
+# TODO: indicator_groups_not_useless_text (e.g. 'v1.23', 'changes', 'group')
+# TODO: indicator_preamble_not_template
+# TODO: indicator_entries_not_template
+# TODO: indicator_entries_english_tense_consistent (all past tense, or all present tense)
+# TODO: indicator_preamble_not_too_long (this indicates misparsing releases as preamble, e.g. when each version is prefixed by a non-number, e.g. in XML-Compile)
 
 1;
 # ABSTRACT: A collection of core indicators for CPAN Changes cwalitee
