@@ -8,8 +8,6 @@ use strict;
 use warnings;
 use Log::ger;
 
-#use CPAN::Changes::CwaliteeCommon;
-
 our %SPEC;
 
 $SPEC{indicator_parsable} = {
@@ -121,7 +119,6 @@ This order is, in my opinion, the best order optimized for reading by users.
 _
     args => {
     },
-    'x.indicator.severity' => 2,
 };
 sub indicator_releases_in_descending_date_order {
     require Data::Cmp;
@@ -150,7 +147,6 @@ $SPEC{indicator_release_dates_not_future} = {
     summary => 'No release dates are in the future',
     args => {
     },
-    'x.indicator.severity' => 2,
 };
 sub indicator_release_dates_not_future {
     require DateTime;
@@ -180,19 +176,20 @@ sub indicator_release_dates_not_future {
     [200, "OK", ''];
 }
 
-$SPEC{indicator_entries_not_useless_text} = {
+$SPEC{indicator_no_useless_text} = {
     v => 1.1,
     summary => 'No useless text in the change lines, e.g. "Release v1.23"',
     args => {
     },
-    'x.indicator.severity' => 2,
 };
-sub indicator_entries_not_useless_text {
+sub indicator_no_useless_text {
     my %args = @_;
     my $r = $args{r};
 
     my $p = $r->{parsed};
     defined $p or return [412];
+
+    # XXX useless text in preamble, group
 
     for my $ver (sort keys %{ $p->{releases} }) {
         my $rel = $p->{releases}{$ver};
@@ -212,18 +209,21 @@ sub indicator_entries_not_useless_text {
     [200, "OK", ''];
 }
 
-$SPEC{indicator_entries_not_all_caps} = {
+$SPEC{indicator_not_all_caps} = {
     v => 1.1,
     summary => 'No all-caps (shouting) text in the change lines, e.g. "REMOVE THE BUG!"',
     args => {
     },
+    'x.indicator.status' => 'optional',
 };
-sub indicator_entries_not_all_caps {
+sub indicator_not_all_caps {
     my %args = @_;
     my $r = $args{r};
 
     my $p = $r->{parsed};
     defined $p or return [412];
+
+    # XXX all-caps in group name? in preamble?
 
     my $code_is_all_caps = sub {
         my $text = shift;
@@ -251,18 +251,20 @@ sub indicator_entries_not_all_caps {
     [200, "OK", ''];
 }
 
-$SPEC{indicator_entries_no_shouting} = {
+$SPEC{indicator_no_shouting} = {
     v => 1.1,
     summary => 'No shouting in the change lines, e.g. "dammit!!!"',
     args => {
     },
 };
-sub indicator_entries_no_shouting {
+sub indicator_no_shouting {
     my %args = @_;
     my $r = $args{r};
 
     my $p = $r->{parsed};
     defined $p or return [412];
+
+    # XXX shouting in group name? shouting in preamble?
 
     for my $ver (sort keys %{ $p->{releases} }) {
         my $rel = $p->{releases}{$ver};
@@ -303,7 +305,7 @@ sub indicator_no_empty_group {
     [200, "OK", ''];
 }
 
-$SPEC{indicator_text_not_too_wide} = {
+$SPEC{indicator_not_too_wide} = {
     v => 1.1,
     summary => 'Text is not too wide',
     args => {
@@ -312,9 +314,9 @@ $SPEC{indicator_text_not_too_wide} = {
             default => 125,
         },
     },
-    priority => 10,
+    'x.indicator.priority' => 1, # before Changes file is parsed
 };
-sub indicator_text_not_too_wide {
+sub indicator_not_too_wide {
     my %args = @_;
     my $r = $args{r};
 
@@ -335,14 +337,13 @@ sub indicator_text_not_too_wide {
 
 # currently commented-out, not good results
 #
-# $SPEC{indicator_preamble_english} = {
+# $SPEC{indicator_english} = {
 #     v => 1.1,
 #     summary => 'Preamble, if exists, is in English',
 #     args => {
 #     },
-#     'x.indicator.severity' => 2,
 # };
-# sub indicator_preamble_english {
+# sub indicator_english {
 #     require Lingua::Identify;
 
 #     my %args = @_;
@@ -370,13 +371,11 @@ sub indicator_text_not_too_wide {
 #     }
 # }
 
-# TODO: indicator_entries_english
 # TODO: indicator_sufficient_entries_length
 # TODO: indicator_version_correct_format
-# TODO: indicator_entries_not_commit_logs
+# TODO: indicator_not_commit_logs
 # TODO: indicator_name_preferred (e.g. Changes and not ChangeLog.txt)
 # TODO: indicator_no_duplicate_version
-# TODO: indicator_groups_not_useless_text (e.g. 'v1.23', 'changes', 'group')
 # TODO: indicator_preamble_not_template
 # TODO: indicator_entries_not_template
 # TODO: indicator_entries_english_tense_consistent (all past tense, or all present tense)
