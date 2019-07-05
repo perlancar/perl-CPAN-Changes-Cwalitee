@@ -46,7 +46,8 @@ sub list_cpan_changes_cwalitee_indicators {
             my $funcmeta = $spec->{$func};
             (my $name = $func) =~ s/\Aindicator_//;
             my $rec = {
-                name => $name,
+                name     => $name,
+                module   => $mod,
                 summary  => $funcmeta->{summary},
                 priority => $funcmeta->{'x.indicator.priority'} // 50,
                 severity => $funcmeta->{'x.indicator.severity'} // 3,
