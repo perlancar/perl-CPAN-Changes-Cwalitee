@@ -104,7 +104,7 @@ cwalitee", and so on.
 
 =head1 INTERNAL NOTES
 
-B<Indicator priority.> fter priority 10, Changes file is parsed using
+B<Indicator priority.> At priority 10, Changes file is parsed using
 CPAN::Changes and the result # it put in 'parsed' key.
 
 

@@ -1,6 +1,9 @@
 0.002   2019-07-05  Released-By: PERLANCAR; Urgency: medium
 
-	- Add indicators: no_empty_group, not_too_wide, not_all_caps,
+	- [refactor] Refactor common stuffs into Cwalitee::Common, which now
+          offers filtering indicator by name, module, status, and severity
+
+        - Add indicators: no_empty_group, not_too_wide, not_all_caps,
           no_shouting, no_useless_text.
 
 	- [ux] Do not show indicator summary and priority when returning
