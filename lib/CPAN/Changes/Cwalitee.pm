@@ -37,14 +37,17 @@ sub list_cpan_changes_cwalitee_indicators {
 
     my $mods = PERLANCAR::Module::List::list_modules(
         'CPAN::Changes::Cwalitee::', {list_modules=>1, recurse=>1});
+    my %seen_names; # val = module
     for my $mod (sort keys %$mods) {
         (my $mod_pm = "$mod.pm") =~ s!::!/!g;
         require $mod_pm;
         my $spec = \%{"$mod\::SPEC"};
         for my $func (sort keys %$spec) {
-            next unless $func =~ /\Aindicator_/;
+            my ($name) = $func =~ /\Aindicator_(\w+)\z/ or next;
+            warn "Duplicate name $name (module $mod and $seen_names{$mod})"
+                if $seen_names{$name};
+            $seen_names{$name} = $mod;
             my $funcmeta = $spec->{$func};
-            (my $name = $func) =~ s/\Aindicator_//;
             my $rec = {
                 name     => $name,
                 module   => $mod,
