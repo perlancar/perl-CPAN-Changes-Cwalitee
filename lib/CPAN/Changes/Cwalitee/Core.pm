@@ -228,7 +228,7 @@ sub indicator_entries_not_all_caps {
     my $code_is_all_caps = sub {
         my $text = shift;
         my $num_letters;
-        my $num_capitals;
+        my $num_capitals = 0;
         for (split //, $text) {
             if (/[A-Za-z]/) { $num_letters++  }
             if (/[A-Z]/)    { $num_capitals++ }
