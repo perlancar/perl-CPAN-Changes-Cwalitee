@@ -278,6 +278,61 @@ sub indicator_entries_no_shouting {
     [200, "OK", ''];
 }
 
+$SPEC{indicator_no_empty_group} = {
+    v => 1.1,
+    summary => 'No empty change group',
+    args => {
+    },
+};
+sub indicator_no_empty_group {
+    my %args = @_;
+    my $r = $args{r};
+
+    my $p = $r->{parsed};
+    defined $p or return [412];
+
+    for my $ver (sort keys %{ $p->{releases} }) {
+        my $rel = $p->{releases}{$ver};
+        for my $chgroup (sort keys %{ $rel->{changes} }) {
+            my $gchanges = $rel->{changes}{$chgroup}{changes};
+            if (!@$gchanges) {
+                return [200, "OK", "Empty change group '$chgroup' in release $rel"];
+            }
+        }
+    }
+    [200, "OK", ''];
+}
+
+$SPEC{indicator_text_not_too_wide} = {
+    v => 1.1,
+    summary => 'Text is not too wide',
+    args => {
+        max_width => {
+            schema => 'uint*',
+            default => 125,
+        },
+    },
+    priority => 10,
+};
+sub indicator_text_not_too_wide {
+    my %args = @_;
+    my $r = $args{r};
+
+    my $max_width = $args{max_width} // 125;
+
+    my $longest = 0;
+    for (split /^/m, $r->{file_content}) {
+        chomp;
+        $longest = length() if $longest < length();
+    }
+
+    if ($longest > $max_width) {
+        return [200, "OK", "Some lines exceed $max_width characters ($longest)"];
+    } else {
+        [200, "OK", ''];
+    }
+}
+
 # currently commented-out, not good results
 #
 # $SPEC{indicator_preamble_english} = {
@@ -320,13 +375,13 @@ sub indicator_entries_no_shouting {
 # TODO: indicator_version_correct_format
 # TODO: indicator_entries_not_commit_logs
 # TODO: indicator_name_preferred (e.g. Changes and not ChangeLog.txt)
-# TODO: indicator_text_not_too_wide
 # TODO: indicator_no_duplicate_version
 # TODO: indicator_groups_not_useless_text (e.g. 'v1.23', 'changes', 'group')
 # TODO: indicator_preamble_not_template
 # TODO: indicator_entries_not_template
 # TODO: indicator_entries_english_tense_consistent (all past tense, or all present tense)
 # TODO: indicator_preamble_not_too_long (this could indicate misparsing releases as preamble, e.g. when each version is prefixed by a non-number, e.g. in XML-Compile)
+# TODO: indicator_indentation_consistent
 
 1;
 # ABSTRACT: A collection of core indicators for CPAN Changes cwalitee
