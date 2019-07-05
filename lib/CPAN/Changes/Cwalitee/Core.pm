@@ -212,6 +212,72 @@ sub indicator_entries_not_useless_text {
     [200, "OK", ''];
 }
 
+$SPEC{indicator_entries_not_all_caps} = {
+    v => 1.1,
+    summary => 'No all-caps (shouting) text in the change lines, e.g. "REMOVE THE BUG!"',
+    args => {
+    },
+};
+sub indicator_entries_not_all_caps {
+    my %args = @_;
+    my $r = $args{r};
+
+    my $p = $r->{parsed};
+    defined $p or return [412];
+
+    my $code_is_all_caps = sub {
+        my $text = shift;
+        my $num_letters;
+        my $num_capitals;
+        for (split //, $text) {
+            if (/[A-Za-z]/) { $num_letters++  }
+            if (/[A-Z]/)    { $num_capitals++ }
+        }
+        return unless $num_letters;
+        $num_capitals / $num_letters >= 0.9;
+    };
+
+    for my $ver (sort keys %{ $p->{releases} }) {
+        my $rel = $p->{releases}{$ver};
+        for my $chgroup (sort keys %{ $rel->{changes} }) {
+            my $gchanges = $rel->{changes}{$chgroup}{changes};
+            for my $change (@$gchanges) {
+                if ($code_is_all_caps->($change)) {
+                    return [200, "OK", "All-caps in text: $change"];
+                }
+            }
+        }
+    }
+    [200, "OK", ''];
+}
+
+$SPEC{indicator_entries_no_shouting} = {
+    v => 1.1,
+    summary => 'No shouting in the change lines, e.g. "dammit!!!"',
+    args => {
+    },
+};
+sub indicator_entries_no_shouting {
+    my %args = @_;
+    my $r = $args{r};
+
+    my $p = $r->{parsed};
+    defined $p or return [412];
+
+    for my $ver (sort keys %{ $p->{releases} }) {
+        my $rel = $p->{releases}{$ver};
+        for my $chgroup (sort keys %{ $rel->{changes} }) {
+            my $gchanges = $rel->{changes}{$chgroup}{changes};
+            for my $change (@$gchanges) {
+                if ($change =~ /(!\s*){3,}/) {
+                    return [200, "OK", "Shouting in text: $change"];
+                }
+            }
+        }
+    }
+    [200, "OK", ''];
+}
+
 # currently commented-out, not good results
 #
 # $SPEC{indicator_preamble_english} = {
@@ -256,12 +322,11 @@ sub indicator_entries_not_useless_text {
 # TODO: indicator_name_preferred (e.g. Changes and not ChangeLog.txt)
 # TODO: indicator_text_not_too_wide
 # TODO: indicator_no_duplicate_version
-# TODO: indicator_entries_not_all_caps
 # TODO: indicator_groups_not_useless_text (e.g. 'v1.23', 'changes', 'group')
 # TODO: indicator_preamble_not_template
 # TODO: indicator_entries_not_template
 # TODO: indicator_entries_english_tense_consistent (all past tense, or all present tense)
-# TODO: indicator_preamble_not_too_long (this indicates misparsing releases as preamble, e.g. when each version is prefixed by a non-number, e.g. in XML-Compile)
+# TODO: indicator_preamble_not_too_long (this could indicate misparsing releases as preamble, e.g. when each version is prefixed by a non-number, e.g. in XML-Compile)
 
 1;
 # ABSTRACT: A collection of core indicators for CPAN Changes cwalitee
