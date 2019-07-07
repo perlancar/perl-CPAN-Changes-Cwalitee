@@ -78,6 +78,8 @@ sub calc_cpan_changes_cwalitee {
 1;
 # ABSTRACT: Calculate the cwalitee of your CPAN Changes file
 
+=for Pod::Coverage ^(.+)$
+
 =head1 SYNOPSIS
 
  use CPAN::Changes::Cwalitee qw(
