@@ -21,7 +21,7 @@ our %SPEC;
 $SPEC{list_cpan_changes_cwalitee_indicators} = {
     v => 1.1,
     args => {
-        %Cwalitee::Common::args_list,
+        Cwalitee::Common::args_list('CPAN::Changes::'),
     },
 };
 sub list_cpan_changes_cwalitee_indicators {
@@ -36,7 +36,7 @@ sub list_cpan_changes_cwalitee_indicators {
 $SPEC{calc_cpan_changes_cwalitee} = {
     v => 1.1,
     args => {
-        %Cwalitee::Common::args_calc,
+        Cwalitee::Common::args_calc('CPAN::Changes::'),
         path => {
             schema => 'pathname*',
             req => 1,
