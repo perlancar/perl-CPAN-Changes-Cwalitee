@@ -1,3 +1,8 @@
+0.004   2019-07-08  Released-By: PERLANCAR; Urgency: medium
+
+	- Activate indicator: english using Lingua::Identify::Any.
+
+
 0.003   2019-07-07  Released-By: PERLANCAR; Urgency: medium
 
 	- Use Cwalitee::Common's args_list() & args_calc() for better
