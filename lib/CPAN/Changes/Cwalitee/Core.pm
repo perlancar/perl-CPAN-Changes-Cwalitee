@@ -335,41 +335,64 @@ sub indicator_not_too_wide {
     }
 }
 
-# currently commented-out, not good results
-#
-# $SPEC{indicator_english} = {
-#     v => 1.1,
-#     summary => 'Preamble, if exists, is in English',
-#     args => {
-#     },
-# };
-# sub indicator_english {
-#     require Lingua::Identify;
+$SPEC{indicator_english} = {
+    v => 1.1,
+    summary => 'Preamble and change entries are in English',
+    args => {
+    },
+};
+sub indicator_english {
+    require Lingua::Identify::Any;
 
-#     my %args = @_;
-#     my $r = $args{r};
+    my %args = @_;
+    my $r = $args{r};
 
-#     my $p = $r->{parsed};
-#     defined $p or return [412];
+    my $p = $r->{parsed};
+    defined $p or return [412];
 
-#     return [200, "OK", ''] unless $p->{preamble} =~ /\S/;
+  DETECT_PREAMBLE_LANGUAGE: {
+        last unless $p->{preamble} =~ /\S/;
+        my $dlres = Lingua::Identify::Any::detect_text_language(text=>$p->{preamble});
+        return [412, "Cannot detect language of preamble: $dlres->[0] - $dlres->[1]"]
+            unless $dlres->[0] == 200;
+        if ($dlres->[2]{'lang_code'} ne 'en') {
+            return [
+                200,
+                "OK", "Language of preamble not detected as English ".
+                    sprintf("(%s, confidence %.2f)",
+                            $dlres->[2]{lang_code},
+                            $dlres->[2]{confidence} // 0,
+                        ),
+            ];
+        }
+    }
 
-#     my %langs = Lingua::Identify::langof($p->{preamble});
-#     return [412, "Lingua::Identify cannot detect language"] unless keys(%langs);
+  DETECT_ENTRIES:
 
-#     my @langs = sort { $langs{$b}<=>$langs{$a} } keys %langs;
-#     my $confidence = Lingua::Identify::confidence(%langs);
-#     log_trace(
-#         "Lingua::Identify result: langof=%s, langs=%s, confidence=%s",
-#         \%langs, \@langs, $confidence);
-#     if ($langs[0] ne 'en') {
-#         [200, "OK", "Language not detected as English, ".
-#              sprintf("%d%% %s (confidence %.2f)",
-#                      $langs{$langs[0]}*100, $langs[0], $confidence)];
-#     } else {
-#         [200, "OK", ''];
-#     }
-# }
+    for my $ver (sort keys %{ $p->{releases} }) {
+        my $rel = $p->{releases}{$ver};
+        for my $chgroup (sort keys %{ $rel->{changes} }) {
+            my $gchanges = $rel->{changes}{$chgroup}{changes};
+            for my $change (@$gchanges) {
+                last unless $change =~ /\S/;
+                my $dlres = Lingua::Identify::Any::detect_text_language(text=>$change);
+                return [412, "Cannot detect language in release $ver: $dlres->[0] - $dlres->[1]"]
+                    unless $dlres->[0] == 200;
+                if ($dlres->[2]{'lang_code'} ne 'en') {
+                    return [
+                        200,
+                        "OK", "Language in release $ver not detected as English ".
+                            sprintf("(%s, confidence %.2f)",
+                                    $dlres->[2]{lang_code},
+                                    $dlres->[2]{confidence} // 0,
+                                ),
+                    ];
+                }
+            }
+        }
+    }
+    [200, "OK", ''];
+}
 
 # TODO: indicator_sufficient_entries_length
 # TODO: indicator_version_correct_format
