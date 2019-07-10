@@ -394,11 +394,35 @@ sub indicator_english {
     [200, "OK", ''];
 }
 
+$SPEC{indicator_no_duplicate_version} = {
+    v => 1.1,
+    summary => 'Versions are unique',
+    args => {
+    },
+};
+sub indicator_no_duplicate_version {
+    require Data::Cmp;
+    require List::Util;
+
+    my %args = @_;
+    my $r = $args{r};
+
+    my $p = $r->{parsed};
+    defined $p or return [412];
+
+    my @vers = sort map { $_->{version} } @{ $p->{_releases_array} // [] };
+    my @uniq_vers = List::Util::uniq(@vers);
+    if (Data::Cmp::cmp_data(\@vers, \@uniq_vers) == 0) {
+        return [200, "OK", ''];
+    } else {
+        return [200, "OK", "There are some duplicate versions"];
+    }
+}
+
 # TODO: indicator_sufficient_entries_length
 # TODO: indicator_version_correct_format
 # TODO: indicator_not_commit_logs
 # TODO: indicator_name_preferred (e.g. Changes and not ChangeLog.txt)
-# TODO: indicator_no_duplicate_version
 # TODO: indicator_preamble_not_template
 # TODO: indicator_entries_not_template
 # TODO: indicator_entries_english_tense_consistent (all past tense, or all present tense)
