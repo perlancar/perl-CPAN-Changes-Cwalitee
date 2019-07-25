@@ -1,3 +1,8 @@
+0.006   2019-07-26  Released-By: PERLANCAR; Urgency: medium
+
+	- Add indicators: preamble_has_no_releases, has_releases.
+
+
 0.005   2019-07-10  Released-By: PERLANCAR; Urgency: medium
 
 	- Add indicator: no_duplicate_version.
