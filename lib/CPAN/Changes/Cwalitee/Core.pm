@@ -419,6 +419,32 @@ sub indicator_no_duplicate_version {
     }
 }
 
+$SPEC{indicator_has_releases} = {
+    v => 1.1,
+    summary => 'There is at least one release',
+    description => <<'_',
+
+The lack of releases could mean the releases are misparsed as preamble due to
+inappropriate format.
+
+_
+    args => {
+    },
+};
+sub indicator_has_releases {
+    my %args = @_;
+    my $r = $args{r};
+
+    my $p = $r->{parsed};
+    defined $p or return [412];
+
+    if (keys %{ $p->{releases} }) {
+        return [200, "OK", ''];
+    } else {
+        return [200, "OK", "There are no releases"];
+    }
+}
+
 # TODO: indicator_sufficient_entries_length
 # TODO: indicator_version_correct_format
 # TODO: indicator_not_commit_logs
