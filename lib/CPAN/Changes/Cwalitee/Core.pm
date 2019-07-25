@@ -445,6 +445,58 @@ sub indicator_has_releases {
     }
 }
 
+$SPEC{indicator_preamble_has_no_releases} = {
+    v => 1.1,
+    summary => 'There does not look like releases in the preamble',
+    description => <<'_',
+
+This might mean the releases are misparsed as preamble due to inappropriate
+format.
+
+_
+    args => {
+    },
+};
+sub indicator_preamble_has_no_releases {
+    my %args = @_;
+    my $r = $args{r};
+
+    my $p = $r->{parsed};
+    defined $p or return [412];
+
+    my $score = 0;
+    my @notes;
+
+    my @lines = split /^/m, $p->{preamble};
+
+    if (@lines > 10) {
+        $score += 1;
+        push @notes, "too long (>10 lines)";
+    }
+    {
+        my $num_ver_line = 0;
+        my $num_change_line = 0;
+        for (@lines) {
+            $num_ver_line++ if /^\s*(v|ver|version|rel|release)\s*\d/i;
+            $num_change_line++ if /^\s*(-|\*|\+)/;
+        }
+        if ($num_ver_line >= 2) {
+            $score += 1 + $num_ver_line/3;
+            push @notes, "many lines look like version lines";
+        }
+        if ($num_change_line >= 2) {
+            $score += 1 + $num_change_line/6;
+            push @notes, "many lines look like change lines";
+        }
+    }
+
+    if ($score < 2) {
+        return [200, "OK", ''];
+    } else {
+        return [200, "OK", "Preamble looks like it contains releases (".join(", ", @notes).")"];
+    }
+}
+
 # TODO: indicator_sufficient_entries_length
 # TODO: indicator_version_correct_format
 # TODO: indicator_not_commit_logs
@@ -452,7 +504,6 @@ sub indicator_has_releases {
 # TODO: indicator_preamble_not_template
 # TODO: indicator_entries_not_template
 # TODO: indicator_entries_english_tense_consistent (all past tense, or all present tense)
-# TODO: indicator_preamble_not_too_long (this could indicate misparsing releases as preamble, e.g. when each version is prefixed by a non-number, e.g. in XML-Compile)
 # TODO: indicator_indentation_consistent
 
 1;
