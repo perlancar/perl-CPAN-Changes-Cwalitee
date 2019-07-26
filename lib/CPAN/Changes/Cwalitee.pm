@@ -23,6 +23,18 @@ $SPEC{list_cpan_changes_cwalitee_indicators} = {
     args => {
         Cwalitee::Common::args_list('CPAN::Changes::'),
     },
+    examples => [
+        {
+            summary => 'List all installed indicators from all modules',
+            args => {},
+            test => 0,
+        },
+        {
+            summary => 'List only certain names, show details',
+            args => {include=>[qw/parsable date_parsable date_correct_format/], detail=>1},
+            test => 0,
+        },
+    ],
 };
 sub list_cpan_changes_cwalitee_indicators {
     my %args = @_;
