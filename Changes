@@ -1,3 +1,8 @@
+0.009   2019-08-02  Released-By: PERLANCAR; Urgency: medium
+
+	- [ux] Read from STDIN when path is '-'.
+
+
 0.008   2019-07-26  Released-By: PERLANCAR; Urgency: low
 
 	- No functional changes.
