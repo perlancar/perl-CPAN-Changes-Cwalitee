@@ -52,6 +52,11 @@ $SPEC{calc_cpan_changes_cwalitee} = {
         path => {
             schema => 'pathname*',
             req => 1,
+            description => <<'_',
+
+Use `-` to read from STDIN.
+
+_
         },
     },
 };
@@ -66,9 +71,17 @@ sub calc_cpan_changes_cwalitee {
         prefix => 'CPAN::Changes::',
         %fargs,
         code_init_r => sub {
+            my $file_content;
+            if ($path eq '-') {
+                local $/;
+                binmode(STDIN, ":encoding(utf8)");
+                $file_content = <STDIN>;
+            } else {
+                $file_content = File::Slurper::read_text($path);
+            }
             return {
                 path => $path,
-                file_content => File::Slurper::read_text($path),
+                file_content => $file_content,
             };
         },
         code_fixup_r => sub {
